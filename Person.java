@@ -1,9 +1,9 @@
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.ArrayList;
 import java.util.List;
 
 public class Person {
+
     public enum Sex {
         MALE, FEMALE
     }
@@ -12,78 +12,40 @@ public class Person {
     private LocalDate birthday;
     private Sex gender;
     private String emailAddress;
-    private List<Person> roster = new ArrayList<>();
 
-    public Person(String name, LocalDate birthday, Sex gender, String emailAddress){
+    // Constructor
+    public Person(String name, LocalDate birthday, Sex gender, String emailAddress) {
         this.name = name;
         this.birthday = birthday;
         this.gender = gender;
         this.emailAddress = emailAddress;
-        this.roster.add(this);
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public LocalDate getBirthday() {
         return birthday;
-    }
-
-    public void setBirthday(LocalDate birthday) {
-        this.birthday = birthday;
     }
 
     public Sex getGender() {
         return gender;
     }
 
-    public void setGender(Sex gender) {
-        this.gender = gender;
-    }
-
     public String getEmailAddress() {
         return emailAddress;
     }
 
-    public void setEmailAddress(String emailAddress) {
-        this.emailAddress = emailAddress;
+    public int getAge() {
+        return Period.between(birthday, LocalDate.now()).getYears();
     }
-
-    public List<Person> getRoster() {
-        return roster;
-    }
-
-    public void setRoster(List<Person> roster) {
-        this.roster = roster;
-    }
-
-    public int getAge(){
-        LocalDate today = LocalDate.now();
-
-        return Period.between(birthday, today).getYears();
-    }
-
-    //local class
-    class CheckPersonEligibleForSelectiveService implements CheckPerson {
-        @Override
-        public boolean test(Person p) {
-            return p.gender == Person.Sex.MALE &&
-                    p.getAge() >= 18 &&
-                    p.getAge() <= 25;
-        }
-    }
-
+    
     public void printPerson() {
-        System.out.println(name + " (" + gender + ") at " + emailAddress);
+        System.out.println("Name: " + name + ", Email: " + emailAddress + ", Age: " + getAge() + ", Gender: " + gender);
     }
 
-    public static void printPersons(
-            List<Person> roster, CheckPerson tester) {
+    public static void printPersons(List<Person> roster, CheckPerson tester) {
         for (Person p : roster) {
             if (tester.test(p)) {
                 p.printPerson();
@@ -91,4 +53,24 @@ public class Person {
         }
     }
 
+    public static void printPersonsLocalClass(List<Person> roster, int age) {
+        class LocalClassChecker implements CheckPerson {
+            public boolean test(Person p) {
+                return p.getAge() >= age;
+            }
+        }
+        printPersons(roster, new LocalClassChecker());
+    }
+
+    public static void printPersonsAnonymousClass(List<Person> roster, int age) {
+        printPersons(roster, new CheckPerson() {
+            public boolean test(Person p) {
+                return p.getAge() >= age;
+            }
+        });
+    }
+
+    public static void printPersonsLambda(List<Person> roster, int age) {
+        printPersons(roster, p -> p.getAge() >= age);
+    }
 }
